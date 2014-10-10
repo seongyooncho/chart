@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tenax Admin Theme</title>
+
+	<link rel="apple-touch-icon" sizes="144x144" href="apple-touch-icon-ipad-retina.png" />
+	<link rel="apple-touch-icon" sizes="114x114" href="apple-touch-icon-iphone-retina.png" />
+	<link rel="apple-touch-icon" sizes="72x72" href="apple-touch-icon-ipad.png" />
+	<link rel="apple-touch-icon" sizes="57x57" href="apple-touch-icon-iphone.png" />
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+    <!-- bootstrap -->
+    <link href="css/bootstrap/bootstrap.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/font-awesome-4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+
+	
+</head>
+<body>
+	
+	<div id="loading">
+		<div>
+			<div></div>
+		    <div></div>
+		    <div></div>
+		</div>
+	</div>
+
+	<div id="wrapper">
+		<div id="main">
+			<div class="container" id="main-container">
+				<div class="main-content">
+					<div class="fluid">
+						<div class="widget grid12">
+							<div class="widget-header">
+								<h2 class="page-title">
+                  <i class="fa fa-bar-chart-o"></i>일사 취득량 및 조명 사용량<span>겨울철 12월~2월 평균 시간대별 사용량</span>
+								</h2>
+								<div class="widget-controls">
+									<div class="dropdown">
+										<select name="one" class="dropdown-select">
+									      <option value="">Zone</option>
+									      <option value="1">South Zone</option>
+									      <option value="2">North Zone</option>
+									    </select>
+									</div>
+								</div>
+							</div> <!-- /widget-header -->
+							<div class="chart-container line-ch">
+								<div class="chart-info">
+									<div class="chart-detail default green">External Infiltration</div>
+									<div class="chart-detail default blue">External Vent.</div>
+									<div class="chart-detail default red">General Lighting</div>
+									<div class="chart-detail default pink">Computer + Equip</div>
+									<div class="chart-detail default orange">Occupancy</div>
+									<div class="chart-detail default magenta">Solar Gains Exterior Windows</div>
+								</div>
+								<canvas id="lineChart" width="1200" height="600"></canvas>
+							</div>
+
+						</div> <!-- /widget -->
+
+					
+					</div> <!-- /fluid -->
+
+
+				</div> <!-- /main-content -->
+			</div>
+		</div> <!-- /main -->
+		
+	</div> <!-- /wrapper -->
+	<script type="text/javascript" src="js/prefixfree.min.js"></script>
+	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/Chart.js"></script>
+	<script type="text/javascript" src="js/jquery.hashchange.min.js"></script>
+	<script type="text/javascript" src="js/jquery.easytabs.min.js"></script>
+	
+	<script type="text/javascript">
+		$(window).load(function(){
+			var mainW = $(window).height() -70;
+			$('.nav').css({ height : mainW })
+			$('.nav-logo').hide()
+			$('#loading').fadeOut(1000);
+			$('.nav-logo').fadeIn()
+		})
+		$(document).ready(function(){
+			
+			$(window).resize(function() {
+				var mainW = $(window).height() -70;
+		        $('.nav').css({ height : mainW })
+
+		  		mQuery();
+		    }); // Window resize
+
+
+			function mQuery() {
+				// Same as @media (max-width: 767px) -> hide the navigation
+		        if ($('.fluid [class*="grid"]').css('float') == 'none' ){
+					$('.nav').removeClass('show');
+				} else {
+					$('.nav').addClass('show');
+				}
+			}
+			mQuery();
+
+			// $('.nav').hide();
+			$('.nav-button').click(function(){
+				// $('.nav').toggleClass('show');
+				$('.nav').toggleClass('show')
+				//$('.nav').fadeToggle(function(){
+					
+				//})
+			})
+			$('.collapsible > a').click(function(){
+				$(this).parent().toggleClass('open')
+			})
+
+			$(".spinner").spinner({
+				icons: { down: "ui-icon-carat-1-s", up: "ui-icon-carat-1-n" },
+				min:1,
+				max:3
+			});
+			$("#spinner-table").on( "spin", function(event, ui) {
+				var val = ui.value;
+				if (val == 2) { $('#media-table tbody tr:last-child').fadeOut(); $('#media-table tbody tr:nth-child(2)').fadeIn() };
+				if (val == 1) { $('#media-table tbody tr:nth-child(2), #media-table tbody tr:last-child').fadeOut(); };
+				if (val == 3) { $('#media-table tbody tr').fadeIn(); };
+			});
+
+			$('#eTabs').easytabs();
+
+			$('.slider').slider();
+
+			$('.slider.range').slider({
+				range: true,
+			    max: 750,
+			    values: [ 75, 300 ],
+				slide: function( event, ui ) {
+			        $( "#amount-min" ).html("$" + ui.values[0]);
+			        $( "#amount-max" ).html("$" + ui.values[1]);
+			      }
+			});
+			$( "#amount-min" ).html( "$" + $( ".slider.range" ).slider( "values", 0));
+			$( "#amount-max" ).html( "$" + $( ".slider.range" ).slider( "values", 1));
+
+			$('.slider.range-min').slider({
+				range: "min",
+				min:50,
+				slide: function( event, ui ) {
+			        $('.slider.range-min > a.ui-slider-handle').html("<div class='range-tooltip'>$ " + $(".slider.range-min").slider("value") + "</div>")
+			      },
+			    stop: function( event, ui ) {
+			    	$('.range-tooltip').delay(1000).fadeOut();
+			    }
+			});
+			$( "#amount-block" ).html("Min: $" + $(".slider.range-min").slider( "option", "min"));
+			$('.slider.range-min > a.ui-slider-handle').hover(function(){
+				$('.slider.range-min > a.ui-slider-handle').html("<div class='range-tooltip'>$ " + $(".slider.range-min").slider("value") + "</div>")
+				$('.range-tooltip').delay(1000).fadeOut();
+			})
+
+			$( ".progressbar" ).progressbar({
+		      value: 37
+		    });
+
+
+		}) // Ready
+	</script>
+	<script type="text/javascript">
+		// Line Chart
+		var lineChartData = {
+			labels : [],
+			datasets : [
+				{
+					fillColor : "rgba(143,182,82,0.0)",
+					strokeColor : "#90b753",
+					pointColor : "#fff",
+					pointStrokeColor : "#90b753",
+          data : [
+            -0.25, -0.25, -0.25, -0.25, 
+            -0.25, -0.25, -0.25, -0.25, 
+            -0.25, -0.25, -0.25, -0.25, 
+            -0.25, -0.25, -0.25, -0.25, 
+            -0.25, -0.25, -0.25, -0.24, 
+            -0.23, -0.22, -0.21, -0.20
+          ]
+				},
+				{
+					fillColor : "rgba(127,176,190,0.0)",
+					strokeColor : "7fb0be",
+					pointColor : "#fff",
+					pointStrokeColor : "#72a9bc",
+          data : [
+            0.00, 0.00, 0.00, 0.00, 
+            0.00, 0.00, -0.12, -0.25, 
+            -0.7, -0.75, -0.75, -0.75, 
+            -0.55, -0.55, -0.75, -0.75, 
+            -0.75, -0.40, -0.20, 0.00, 
+            0.00, 0.00, 0.00, 0.00
+          ] 
+				},
+				{
+					fillColor : "rgba(255,0,0,0.0)",
+					strokeColor : "red",
+					pointColor : "#fff",
+					pointStrokeColor : "red",
+          data : [
+            0.00, 0.00, 0.00, 0.00, 
+            0.00, 0.00, 0.00, 0.50, 
+            0.05, 0.05, 0.05, 0.05, 
+            0.05, 0.05, 0.05, 0.05, 
+            0.35, 0.75, 0.75, 0.00, 
+            0.00, 0.00, 0.00, 0.00
+          ] 
+				},
+				{
+					fillColor : "rgba(255,192,203,0.0)",
+					strokeColor : "pink",
+					pointColor : "#fff",
+					pointStrokeColor : "pink",
+          data : [
+            0.00, 0.00, 0.00, 0.00, 
+            0.00, 0.00, 0.00, 0.45, 
+            0.45, 0.45, 0.45, 0.45, 
+            0.45, 0.45, 0.45, 0.45, 
+            0.45, 0.45, 0.45, 0.45, 
+            0.00, 0.00, 0.00, 0.00
+          ] 
+				},
+				{
+					fillColor : "rgba(255,192,203,0.0)",
+					strokeColor : "orange",
+					pointColor : "#fff",
+					pointStrokeColor : "orange",
+          data : [
+            0.00, 0.00, 0.00, 0.00, 
+            0.00, 0.00, 0.00, 0.10, 
+            0.20, 0.30, 0.30, 0.20, 
+            0.10, 0.10, 0.10, 0.10, 
+            0.10, 0.10, 0.00, 0.00, 
+            0.00, 0.00, 0.00, 0.00
+          ] 
+				},
+				{
+					fillColor : "rgba(255,192,203,0.0)",
+					strokeColor : "magenta",
+					pointColor : "#fff",
+					pointStrokeColor : "magenta",
+          data : [
+            0.00, 0.00, 0.00, 0.00, 
+            0.00, 0.00, 0.00, 0.20, 
+            0.90, 1.75, 2.45, 2.70, 
+            2.70, 2.45, 1.80, 1.00, 
+            0.25, 0.00, 0.00, 0.00,
+            0.00, 0.00, 0.00, 0.00
+          ] 
+				},
+			]
+			
+		}
+    for (var i = 1; i < 25; i++) {
+      lineChartData.labels.push(""+i+":00");
+    }
+
+		var myLine = new Chart(document.getElementById("lineChart").getContext("2d")).Line(lineChartData, {
+			bezierCurve : false,
+			scaleFontSize : 10,
+			scaleFontColor: "#929191",
+			animation: true,
+			scaleOverride : false,
+			scaleSteps : 0.5,
+			scaleStepWidth : 8,
+			scaleStartValue : -1.0,
+		});
+
+
+		// Doughnut Chart
+		var doughnutData = [
+			{
+				value: 40,
+				color:"#90b753"
+			},
+			{
+				value : 25,
+				color : "#72a9bc"
+			},
+			{
+				value : 14,
+				color : "#ff5764"
+			},
+			{
+				value : 21,
+				color : "transparent"
+			}
+		];
+
+		var myDoughnut = new Chart(document.getElementById("doughtChart").getContext("2d")).Doughnut(doughnutData, {
+			segmentStrokeColor : "rgba(0,0,0,0.1)",
+			percentageInnerCutout : 60,
+			animation : true
+		});
+	
+
+		// Bar Chart
+
+		var barChartData = {
+			labels : ["January","February","March","April","May","June","July"],
+			datasets : [
+				{
+					fillColor : "#72a9bc",
+					data : [65,59,90,81,56,55,40]
+				},
+				{
+					fillColor : "#a6c57c",
+					data : [28,48,40,19,96,27,100]
+				}
+			]
+		}
+
+		var myBar = new Chart(document.getElementById("barChart").getContext("2d")).Bar(barChartData, {
+			bezierCurve : false,
+			scaleFontSize : 10,
+			animation: true,
+			scaleOverride : true,
+			scaleSteps : 5,
+			scaleStepWidth : 20,
+			scaleStartValue : 0,
+		});
+
+
+		var radarChartData = {
+			labels : ["Eating","Drinking","Sleeping","Designing","Coding","Partying","Running"],
+			datasets : [
+				{
+					fillColor : "rgba(220,220,220,0.5)",
+					strokeColor : "rgba(220,220,220,1)",
+					pointColor : "rgba(220,220,220,1)",
+					pointStrokeColor : "#fff",
+					data : [65,59,90,81,56,55,40]
+				},
+				{
+					fillColor : "rgba(151,187,205,0.5)",
+					strokeColor : "rgba(151,187,205,1)",
+					pointColor : "rgba(151,187,205,1)",
+					pointStrokeColor : "#fff",
+					data : [28,48,40,19,96,27,100]
+				}
+			]
+		}
+
+		var myRadar = new Chart(document.getElementById("radarChart").getContext("2d")).Radar(radarChartData, {
+	
+			scaleFontSize : 10,
+			animation: true,
+			scaleOverride : true,
+			scaleSteps : 5,
+			scaleStepWidth : 20,
+			scaleStartValue : 0
+		});
+
+
+		var polarChartData = [
+			{
+				value : 30,
+				color: "#D97041"
+			},
+			{
+				value : 90,
+				color: "#C7604C"
+			},
+			{
+				value : 24,
+				color: "#21323D"
+			},
+			{
+				value : 58,
+				color: "#9D9B7F"
+			},
+			{
+				value : 82,
+				color: "#7D4F6D"
+			},
+			{
+				value : 8,
+				color: "#584A5E"
+			}
+		]
+
+		var myPolar = new Chart(document.getElementById("polarChart").getContext("2d")).PolarArea(polarChartData, {
+	
+			scaleFontSize : 10,
+			animation: true,
+			scaleOverride : true,
+			scaleSteps : 5,
+			scaleStepWidth : 20,
+			scaleStartValue : 0
+		});
+
+	</script>
+</body>
+</html>
